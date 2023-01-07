@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class FrameDetector {
-    private Logger logger;
+    private static final Logger LOGGER = Logger.getLogger(FrameDetector.class.getName());
     private final Mat templateImageGray;
     private final Rect templateRoi;
     private final Rect bannerRoi;
@@ -96,7 +96,7 @@ public class FrameDetector {
         }
 
 
-        this.logger.fine(
+        LOGGER.fine(
                 String.format(
                         "Frame %d => lastHasBanner: %b, hasBanner: %b, hasFirstCharacter: %b, hasSecondCharacter: %b\n",
                         frameCount,
@@ -223,9 +223,5 @@ public class FrameDetector {
         result.release();
 
         return frameRect;
-    }
-
-    public void setLogger(String loggerName) {
-        this.logger = Logger.getLogger(loggerName);
     }
 }

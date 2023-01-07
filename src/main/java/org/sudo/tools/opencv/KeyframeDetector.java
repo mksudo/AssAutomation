@@ -31,7 +31,6 @@ public class KeyframeDetector extends Detector {
         );
 
         this.taskProgress.setTaskName("Key Frame Detector");
-        this.frameDetector.setLogger("Key Frame Detector");
 
         if (!stream.isOpened()) {
             LOGGER.info("Cannot open video file");

@@ -38,27 +38,12 @@ public class ConfigProvider {
         this.loadUserConfig();
         this.loadResolutionMaskConfigs();
         this.loadCharacterStyleConfig();
-        this.setProjectLoggingConfig();
     }
 
     private void loadUserConfig() {
         this.userConfig = loadTomlFile(new File(USER_CONFIG_PATH), UserConfig.class);
     }
 
-    private void setProjectLoggingConfig() {
-        if (this.userConfig == null) return;
-        if (this.userConfig.debug()) {
-            try {
-                LogManager
-                        .getLogManager()
-                        .readConfiguration(
-                                new FileInputStream("logging.properties")
-                        );
-            } catch (Exception ignored) {
-                LOGGER.warning("read logging setting failed");
-            }
-        }
-    }
 
     private void loadResolutionMaskConfigs() {
         if (this.userConfig == null) {
