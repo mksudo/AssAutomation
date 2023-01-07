@@ -1,0 +1,16 @@
+# path to sample ass file
+sampleAssFilePath = "sample.ass"
+
+# path to resolution mask config files, empty string refers to project folder
+resolutionMaskConfigFilePath = ""
+
+# all resolution mask config file names
+# must be a valid toml file saved with utf-8 encoding
+
+# two files would make the array like ["1920x1440.toml", "2560x1600.toml"], 
+# note that there can be line breaks between file names
+resolutionMaskConfigFileNames = [
+    "1920x1440.toml"
+]
+
+debug = false
