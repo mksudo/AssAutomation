@@ -30,7 +30,7 @@ public class AssEvent {
         int hour = (int) ((timeStamp - timeStampNoHour) / 3600);
         int minute = (int) ((timeStampNoHour - seconds) / 60);
 
-        return String.format("%d:%02d:%02.02f", hour, minute, seconds);
+        return String.format("%d:%02d:%05.2f", hour, minute, seconds);
     }
 
     @Override
