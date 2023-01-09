@@ -1,6 +1,6 @@
 # on screen name : style name
 # this line defines the default character style when character name is unknown
-"default" = "screen"
+"default" = "剧情人物"
 
 "ミク" = "初音ミク"
 "リン" = "鏡音リン"

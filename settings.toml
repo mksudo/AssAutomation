@@ -10,7 +10,7 @@ resolutionMaskConfigFilePath = ""
 # two files would make the array like ["1920x1440.toml", "2560x1600.toml"], 
 # note that there can be line breaks between file names
 resolutionMaskConfigFileNames = [
-    "1920x1440.toml"
+    "2560x1600.toml"
 ]
 
 debug = false
