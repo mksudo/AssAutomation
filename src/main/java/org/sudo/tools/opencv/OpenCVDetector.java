@@ -98,9 +98,15 @@ public class OpenCVDetector extends Thread {
 
         LOGGER.fine("template roi for current video is " + templateRoi);
 
+        double bannerRoiWidth = this.videoWidth * 25.0 / 64.0;
+        double bannerRoiHeight = this.videoHeight / 10.0;
+
+        double bannerStartPointX = this.videoWidth * 39.0 / 128.0;
+        double bannerStartPointY = this.videoHeight * 9.0 / 20.0;
+
         Rect bannerRoi = new Rect(
-                new Point(this.videoWidth / 3.0, this.videoHeight * 11.0 / 24.0),
-                new Size(this.videoWidth / 3.0, this.videoHeight / 12.0)
+                new Point(bannerStartPointX, bannerStartPointY),
+                new Size(bannerRoiWidth, bannerRoiHeight)
         );
 
         LOGGER.fine("transition roi for current video is " + bannerRoi);
