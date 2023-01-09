@@ -15,6 +15,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FrameDetector {
@@ -95,8 +96,8 @@ public class FrameDetector {
             ));
         }
 
-
-        LOGGER.fine(
+        if (LOGGER.isLoggable(Level.FINE))
+            LOGGER.fine(
                 String.format(
                         "Frame %d => lastHasBanner: %b, hasBanner: %b, hasFirstCharacter: %b, hasSecondCharacter: %b\n",
                         frameCount,
@@ -105,7 +106,7 @@ public class FrameDetector {
                         hasFirstCharacter,
                         hasSecondCharacter
                 )
-        );
+            );
     }
 
     public static boolean detectHasBanner(Mat frame, Rect roi) {
@@ -142,6 +143,8 @@ public class FrameDetector {
         Imgproc.findContours(dilatedRoi, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         if (contours.size() != 1) {
+            if (LOGGER.isLoggable(Level.FINE))
+                LOGGER.fine("detectHasBanner => rejected by contour size " + contours.size());
             return false;
         }
 
@@ -154,17 +157,28 @@ public class FrameDetector {
         );
 
         if (boundingRect.height < bannerTextArea.height / 2.0) {
+            if (LOGGER.isLoggable(Level.FINE))
+                LOGGER.fine("detectHasBanner => rejected by bound rect height " + boundingRect.height);
             return false;
         }
 
         double bannerTextAreaMidpointX = bannerTextArea.width / 2.0;
         double boundingRectMidpointX = boundingRect.x + boundingRect.width / 2.0;
 
-        if (Math.sqrt(Math.pow(bannerTextAreaMidpointX - boundingRectMidpointX, 2.0)) > 20.0) {
+        double midPointDistance = Math.sqrt(Math.pow(bannerTextAreaMidpointX - boundingRectMidpointX, 2.0));
+        if (midPointDistance > 20.0) {
+            if (LOGGER.isLoggable(Level.FINE))
+                LOGGER.fine("detectHasBanner => rejected by midpoint distance " + midPointDistance);
             return false;
         }
 
-        return bannerTextArea.contains(boundingRect.tl()) && bannerTextArea.contains(boundingRect.br());
+        if (bannerTextArea.contains(boundingRect.tl()) && bannerTextArea.contains(boundingRect.br())) {
+            return true;
+        }
+
+        if (LOGGER.isLoggable(Level.FINE))
+            LOGGER.fine("detectHasBanner => rejected by point contain, banner area " + bannerTextArea + " bounding rect " + boundingRect);
+        return false;
     }
 
     public boolean detectHasCharacter(Mat frame, Rect roi) throws Exception {
@@ -179,7 +193,11 @@ public class FrameDetector {
 
         double standardDeviationValue = standardDeviation.get(0, 0)[0] / 255.0;
 
-        if (standardDeviationValue < 0.11) return false;
+        if (standardDeviationValue < 0.11) {
+            if (LOGGER.isLoggable(Level.FINE))
+                LOGGER.fine("detectHasCharacter => rejected by standard deviation value" + standardDeviationValue);
+            return false;
+        }
 
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2, 2));
         Mat dilatedRoi = new Mat();
@@ -191,7 +209,12 @@ public class FrameDetector {
 
         Imgproc.findContours(dilatedRoi, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        return contours.size() > 0;
+        if(contours.size() > 0) {
+            return true;
+        }
+        if (LOGGER.isLoggable(Level.FINE))
+            LOGGER.fine("detectHasCharacter => rejected by contour size");
+        return false;
     }
 
     public static Rect detectTemplate(Mat frame, Mat templateGray, Rect roi) {
@@ -217,6 +240,9 @@ public class FrameDetector {
             );
 
             frameRect = new Rect(frameLoc, templateGray.size());
+        } else {
+            if (LOGGER.isLoggable(Level.FINE))
+                LOGGER.fine("detectTemplate => rejected by template matchVal " + matchVal + " matchLoc " + matchLoc);
         }
 
         frameRoiGray.release();
