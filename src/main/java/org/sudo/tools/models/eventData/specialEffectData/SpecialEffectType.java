@@ -1,5 +1,8 @@
 package org.sudo.tools.models.eventData.specialEffectData;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 /**
  * Reference: <a href="https://github.com/Sekai-World/sekai-viewer/blob/dev/src/types.d.ts">...</a>
  * Reference Time: 2023-01-04
@@ -34,5 +37,7 @@ public enum SpecialEffectType {
     SIMPLE_SELECTABLE,
     FULL_SCREEN_TEXT,
     STOP_SHAKE_SCREEN,
-    STOP_SHAKE_WINDOW
+    STOP_SHAKE_WINDOW,
+    @JsonEnumDefaultValue
+    UNKNOWN
 }

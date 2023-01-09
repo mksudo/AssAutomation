@@ -1,5 +1,6 @@
 package org.sudo.tools.scene;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.sudo.tools.models.eventData.EventData;
@@ -18,6 +19,10 @@ public class SceneReader {
     private EventData eventData;
     @Getter
     private List<SceneTextSection> textSections;
+
+    public SceneReader() {
+        MAPPER.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
+    }
 
     public void read(File jsonFile) throws IOException {
         this.eventData = MAPPER.readValue(jsonFile, EventData.class);
