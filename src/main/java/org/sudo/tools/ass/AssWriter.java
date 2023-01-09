@@ -114,9 +114,9 @@ public class AssWriter {
                             .labelName("Dialogue")
                             .startTimeStamp(videoSection.getStartTimeStamp())
                             .endTimeStamp(videoSection.getEndTimeStamp())
-                            .style(locationTextStyle)
+                            .style("screen")
                             .name("transition")
-                            .text(textSection.getText())
+                            .text(locationTextStyle + textSection.getText())
                             .build();
                     this.assEvents.add(dialogue);
                 }
@@ -138,6 +138,7 @@ public class AssWriter {
 
     private void parseCommentAssEvents(int alignedSize, String textMask, String locationTextMask) {
         VideoSection maskStartSection = null, maskEndSection = null;
+        SceneTextSection maskStartTextSection = null;
 
         for (int alignedIndex = 0; alignedIndex < alignedSize; alignedIndex++) {
             VideoSection videoSection = this.videoSections.get(alignedIndex);
@@ -145,15 +146,21 @@ public class AssWriter {
 
             if (maskStartSection == null) {
                 maskStartSection = videoSection;
+                maskEndSection = videoSection;
+                maskStartTextSection = textSection;
                 continue;
             }
 
-            if (maskEndSection == null || videoSection.getStartFrame() - maskEndSection.getEndFrame() < 5) {
+            if (
+                    videoSection.getStartFrame() - maskEndSection.getEndFrame() < 5 &&
+                            textSection.getType() == maskStartTextSection.getType() &&
+                            alignedIndex < alignedSize - 1
+            ) {
                 maskEndSection = videoSection;
                 continue;
             }
 
-            switch (textSection.getType()) {
+            switch (maskStartTextSection.getType()) {
                 case TRANSITION -> {
                     AssEvent comment = AssEvent.builder()
                             .labelName("Comment")
@@ -179,7 +186,8 @@ public class AssWriter {
             }
 
             maskStartSection = videoSection;
-            maskEndSection = null;
+            maskEndSection = videoSection;
+            maskStartTextSection = textSection;
         }
     }
 
