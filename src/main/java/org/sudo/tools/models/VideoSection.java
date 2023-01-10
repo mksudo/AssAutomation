@@ -35,6 +35,10 @@ public class VideoSection {
         this.endTimeStamp = this.endFrame / fps;
     }
 
+    public boolean tooShort() {
+        return this.endFrame - this.startFrame < 10;
+    }
+
     @Override
     public String toString() {
         return String.format("{ startFrame = %d, endFrame = %d, startTimeStamp = %,.2f, endTimeStamp = %,.2f }", this.startFrame, this.endFrame, this.startTimeStamp, this.endTimeStamp);

@@ -152,7 +152,7 @@ public class OpenCVDetector extends Thread {
                     try {
                         var sections = result.get()
                                 .stream()
-                                .filter(Predicate.not(VideoSection::isPlaceHolder))
+                                .filter(Predicate.not(VideoSection::isPlaceHolder).and(Predicate.not(VideoSection::tooShort)))
                                 .toList();
                         sections.forEach(section -> section.calculateTimeStamp(this.videoFps));
                         this.videoSections.addAll(sections);
