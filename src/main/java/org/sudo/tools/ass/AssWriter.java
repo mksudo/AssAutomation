@@ -153,11 +153,12 @@ public class AssWriter {
 
             if (
                     videoSection.getStartFrame() - maskEndSection.getEndFrame() < 5 &&
-                            textSection.getType() == maskStartTextSection.getType() &&
-                            alignedIndex < alignedSize - 1
+                            textSection.getType() == maskStartTextSection.getType()
             ) {
                 maskEndSection = videoSection;
-                continue;
+                if (alignedIndex < alignedSize - 1) {
+                    continue;
+                }
             }
 
             switch (maskStartTextSection.getType()) {
