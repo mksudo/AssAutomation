@@ -9,6 +9,7 @@ import org.sudo.tools.utils.LogArea;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,12 +38,14 @@ public class GUIProvider {
     private File jsonFile;
 
     private final JButton runButton;
+    private ActionListener runButtonActionListener;
 
     private final List<LogArea> logAreas;
     private LogArea taskLogArea;
 
     private final SceneReader sceneReader;
     private final OpenCVDetector detector;
+    private boolean isTaskRunning;
 
     public GUIProvider() {
         this.frame = new JFrame(TITLE);
@@ -72,6 +75,7 @@ public class GUIProvider {
         );
 
         this.runButton = new JButton("Run");
+        this.runButtonActionListener = null;
 
         this.scrollPane = new JScrollPane(this.textArea);
 
@@ -84,6 +88,8 @@ public class GUIProvider {
 
         this.sceneReader = new SceneReader();
         this.detector = new OpenCVDetector();
+
+        this.isTaskRunning = false;
 
         this.checkConfig();
     }
@@ -169,6 +175,15 @@ public class GUIProvider {
                                         .collect(Collectors.joining("\n"))
                 );
                 this.writeAssFile();
+
+                this.isTaskRunning = false;
+                this.runButton.removeActionListener(this.runButtonActionListener);
+                this.videoFile = null;
+                this.jsonFile = null;
+                this.videoChooser.setSelectedFile(null);
+                this.videoSelectButton.setText("Select video");
+                this.jsonChooser.setSelectedFile(null);
+                this.jsonSelectButton.setText("Select json file");
             });
 
             this.setTaskLogArea(detectors.size());
@@ -218,18 +233,37 @@ public class GUIProvider {
 
         this.panel.setLayout(new GridLayout(4, 1));
         panel.add(this.runButton, 1);
-        this.runButton.addActionListener(action -> {
-            if (this.videoFile == null || this.jsonFile == null) return;
 
-            this.runSceneReader();
-            this.runOpenCVDetect();
-        });
+        if (this.runButtonActionListener == null) {
+            this.runButtonActionListener = action -> {
+                if (this.videoFile == null || this.jsonFile == null) return;
+
+                if (this.isTaskRunning) {
+                    addLogToLogArea("Task is still running, please wait until it finishes");
+                    return;
+                }
+
+
+                this.isTaskRunning = true;
+
+                this.runSceneReader();
+                this.runOpenCVDetect();
+            };
+        }
+
+        this.runButton.addActionListener(this.runButtonActionListener);
     }
 
     private void initializeSelectButton() {
         this.videoSelectButton.addActionListener(action -> {
             if (this.videoChooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
                 return;
+
+            if (this.isTaskRunning) {
+                addLogToLogArea("Task is still running, please wait until it finishes");
+                return;
+            }
+
             this.videoFile = this.videoChooser.getSelectedFile();
             this.videoSelectButton.setText(this.videoFile.getName());
             Preferences.userRoot().node(TITLE).put(VIDEO_FOLDER_USER_PREFERENCE, this.videoFile.getAbsolutePath());
@@ -242,6 +276,12 @@ public class GUIProvider {
         this.jsonSelectButton.addActionListener(action -> {
             if (this.jsonChooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
                 return;
+
+            if (this.isTaskRunning) {
+                addLogToLogArea("Task is still running, please wait until it finishes");
+                return;
+            }
+
             this.jsonFile = this.jsonChooser.getSelectedFile();
             this.jsonSelectButton.setText(this.jsonFile.getName());
             Preferences.userRoot().node(TITLE).put(JSON_FOLDER_USER_PREFERENCE, this.jsonFile.getAbsolutePath());

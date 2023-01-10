@@ -35,6 +35,7 @@ public class KeyframeDetector extends Detector {
         if (!stream.isOpened()) {
             LOGGER.info("Cannot open video file");
             this.taskProgress.setError("Cannot open video file");
+            stream.release();
             return this.videoSections;
         }
 
@@ -97,13 +98,16 @@ public class KeyframeDetector extends Detector {
                     if (!this.frameDetector.hasSecondCharacter()) {
                         LOGGER.info("case 3");
 
-                        if (this.currentTextSectionIndex < this.textSections.size() - 1) {
+                        if (this.currentTextSectionIndex < this.textSections.size()) {
                             if (this.isLastVideoStartedButNotEnded()) {
                                 this.setVideoSectionEnd(frameCounter);
                                 this.proceedToNextTextSection();
                             }
 
                             this.setVideoSectionStart(frameCounter);
+
+                            if (this.currentTextSectionIndex > this.textSections.size() - 1)
+                                continue;
 
                             this.skipToFrame = frameCounter + calculateTextToFrames(
                                     this.textSections
@@ -135,6 +139,8 @@ public class KeyframeDetector extends Detector {
         }
 
         LOGGER.info("Task finished!");
+
+        stream.release();
 
         return this.videoSections;
     }

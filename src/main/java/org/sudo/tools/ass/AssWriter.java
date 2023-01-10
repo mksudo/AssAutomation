@@ -136,6 +136,33 @@ public class AssWriter {
         }
     }
 
+    private void addCommentAssEvent(VideoSection startSection, VideoSection endSection, SceneTextSection textSection, String locationTextMask, String textMask) {
+        switch (textSection.getType()) {
+            case TRANSITION -> {
+                AssEvent comment = AssEvent.builder()
+                        .labelName("Comment")
+                        .startTimeStamp(startSection.getStartTimeStamp())
+                        .endTimeStamp(endSection.getEndTimeStamp())
+                        .name("screen")
+                        .style("screen")
+                        .text(locationTextMask.isEmpty() ? "TODO: fill location text mask" : locationTextMask)
+                        .build();
+                this.assEvents.add(comment);
+            }
+            case CONVERSATION -> {
+                AssEvent comment = AssEvent.builder()
+                        .labelName("Comment")
+                        .startTimeStamp(startSection.getStartTimeStamp())
+                        .endTimeStamp(endSection.getEndTimeStamp())
+                        .name("screen")
+                        .style("screen")
+                        .text(textMask.isEmpty() ? "TODO: fill conversation text mask" : textMask)
+                        .build();
+                this.assEvents.add(comment);
+            }
+        }
+    }
+
     private void parseCommentAssEvents(int alignedSize, String textMask, String locationTextMask) {
         VideoSection maskStartSection = null, maskEndSection = null;
         SceneTextSection maskStartTextSection = null;
@@ -161,34 +188,15 @@ public class AssWriter {
                 }
             }
 
-            switch (maskStartTextSection.getType()) {
-                case TRANSITION -> {
-                    AssEvent comment = AssEvent.builder()
-                            .labelName("Comment")
-                            .startTimeStamp(maskStartSection.getStartTimeStamp())
-                            .endTimeStamp(maskEndSection.getEndTimeStamp())
-                            .name("screen")
-                            .style("screen")
-                            .text(locationTextMask.isEmpty() ? "TODO: fill location text mask" : locationTextMask)
-                            .build();
-                    this.assEvents.add(comment);
-                }
-                case CONVERSATION -> {
-                    AssEvent comment = AssEvent.builder()
-                            .labelName("Comment")
-                            .startTimeStamp(maskStartSection.getStartTimeStamp())
-                            .endTimeStamp(maskEndSection.getEndTimeStamp())
-                            .name("screen")
-                            .style("screen")
-                            .text(textMask.isEmpty() ? "TODO: fill conversation text mask" : textMask)
-                            .build();
-                    this.assEvents.add(comment);
-                }
-            }
+            addCommentAssEvent(maskStartSection, maskEndSection, maskStartTextSection, locationTextMask, textMask);
 
-            maskStartSection = videoSection;
-            maskEndSection = videoSection;
-            maskStartTextSection = textSection;
+            if (alignedIndex < alignedSize - 1) {
+                maskStartSection = videoSection;
+                maskEndSection = videoSection;
+                maskStartTextSection = textSection;
+            } else {
+                addCommentAssEvent(videoSection, videoSection, textSection, locationTextMask, textMask);
+            }
         }
     }
 

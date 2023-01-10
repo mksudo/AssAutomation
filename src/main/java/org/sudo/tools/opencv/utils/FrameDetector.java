@@ -195,7 +195,7 @@ public class FrameDetector {
 
         if (standardDeviationValue < 0.11) {
             if (LOGGER.isLoggable(Level.FINE))
-                LOGGER.fine("detectHasCharacter => rejected by standard deviation value" + standardDeviationValue);
+                LOGGER.fine("detectHasCharacter => rejected by standard deviation value: " + standardDeviationValue);
             return false;
         }
 
