@@ -199,6 +199,9 @@ public class FrameDetector {
             return false;
         }
 
+        if (LOGGER.isLoggable(Level.FINE))
+            LOGGER.fine("detectHasCharacter => accepted by standard deviation value: " + standardDeviationValue);
+
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2, 2));
         Mat dilatedRoi = new Mat();
 

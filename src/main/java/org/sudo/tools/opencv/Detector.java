@@ -41,10 +41,21 @@ public abstract class Detector implements Callable<List<VideoSection>> {
 
     protected boolean setVideoSectionEnd(int frame) {
         VideoSection lastVideoSection = this.getLastVideoSection();
-        boolean hasLastFrame = lastVideoSection.hasEnd();
-        lastVideoSection.setEndFrame(frame);
-        this.videoSections.add(new VideoSection());
-        return hasLastFrame;
+
+        if (this.isLastVideoStartedButNotEnded()) {
+            lastVideoSection.setEndFrame(frame);
+            if (lastVideoSection.tooShort()) {
+                // false detection
+                lastVideoSection.setStartFrame(-1);
+                lastVideoSection.setEndFrame(-1);
+                return false;
+            } else {
+                this.videoSections.add(new VideoSection());
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected boolean isLastVideoStartedButNotEnded() {

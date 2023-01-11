@@ -78,13 +78,15 @@ public class KeyframeDetector extends Detector {
                     if (this.frameDetector.lastHasBanner()) {
                         LOGGER.info("case 1.3");
 
-                        this.setVideoSectionEnd(frameCounter);
-                        this.proceedToNextTextSection();
+                        if (this.setVideoSectionEnd(frameCounter)) {
+                            this.proceedToNextTextSection();
+                        }
                     } else if (this.isLastVideoStartedButNotEnded()) {
                         LOGGER.info("case 1.4");
 
-                        this.setVideoSectionEnd(frameCounter);
-                        this.proceedToNextTextSection();
+                        if (this.setVideoSectionEnd(frameCounter)) {
+                            this.proceedToNextTextSection();
+                        }
                     }
                 }
             } else {
@@ -98,14 +100,13 @@ public class KeyframeDetector extends Detector {
                     if (!this.frameDetector.hasSecondCharacter()) {
                         LOGGER.info("case 3");
 
+                        if (this.isLastVideoStartedButNotEnded() && this.setVideoSectionEnd(frameCounter)) {
+                            this.proceedToNextTextSection();
+                        }
+
+                        this.setVideoSectionStart(frameCounter);
+
                         if (this.currentTextSectionIndex < this.textSections.size()) {
-                            if (this.isLastVideoStartedButNotEnded()) {
-                                this.setVideoSectionEnd(frameCounter);
-                                this.proceedToNextTextSection();
-                            }
-
-                            this.setVideoSectionStart(frameCounter);
-
                             if (this.currentTextSectionIndex > this.textSections.size() - 1)
                                 continue;
 
@@ -132,8 +133,9 @@ public class KeyframeDetector extends Detector {
                 } else if (this.isLastVideoStartedButNotEnded()) {
                     LOGGER.info("case 2");
 
-                    this.setVideoSectionEnd(frameCounter);
-                    this.proceedToNextTextSection();
+                    if (this.setVideoSectionEnd(frameCounter)) {
+                        this.proceedToNextTextSection();
+                    }
                 }
             }
         }
