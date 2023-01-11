@@ -33,7 +33,7 @@ public class OpenCVDetector extends Thread {
     @Getter
     private final List<Detector> detectors;
     @Getter
-    private List<VideoSection> videoSections;
+    private final List<VideoSection> videoSections;
     @Setter
     private Runnable taskFinishCallback;
     @Getter
@@ -51,6 +51,7 @@ public class OpenCVDetector extends Thread {
     public OpenCVDetector() {
         this.detectors = new ArrayList<>();
         this.useKeyframeDetector = true;
+        this.videoSections = new ArrayList<>();
     }
 
     public void prepareTasks(File videoFile) {
@@ -139,8 +140,6 @@ public class OpenCVDetector extends Thread {
     }
 
     public void run() {
-        this.videoSections = new ArrayList<>();
-
         try {
             LOGGER.info("running " + this.detectors.size() + " detectors");
 
@@ -172,14 +171,5 @@ public class OpenCVDetector extends Thread {
         } catch (InterruptedException ignored) {
             LOGGER.warning("InterruptedException error while invoking tasks");
         }
-
-        this.cleanUp();
-    }
-
-    private void cleanUp() {
-        this.detectors.forEach(
-                videoSectionDetector -> videoSectionDetector.getTaskProgress().removeAllProgressUpdateListeners()
-        );
-        this.detectors.clear();
     }
 }

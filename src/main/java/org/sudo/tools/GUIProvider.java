@@ -44,7 +44,7 @@ public class GUIProvider {
     private LogArea taskLogArea;
 
     private final SceneReader sceneReader;
-    private final OpenCVDetector detector;
+    private OpenCVDetector detector;
     private boolean isTaskRunning;
 
     public GUIProvider() {
@@ -87,7 +87,6 @@ public class GUIProvider {
         this.logAreas.add(new LogArea());
 
         this.sceneReader = new SceneReader();
-        this.detector = new OpenCVDetector();
 
         this.isTaskRunning = false;
 
@@ -133,6 +132,8 @@ public class GUIProvider {
 
     private void runOpenCVDetect() {
         try {
+            this.detector = new OpenCVDetector();
+
             this.addLogToLogArea("Opencv detector initializing ...");
 
             this.detector.setTextSections(
@@ -317,7 +318,7 @@ public class GUIProvider {
     }
 
     private void updateLogArea() {
-        if (this.detector.isUseKeyframeDetector()) {
+        if (this.detector == null || this.detector.isUseKeyframeDetector()) {
             this.updateLogAreaNotSync();
         } else {
             this.updateLogAreaSync();
