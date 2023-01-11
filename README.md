@@ -1,5 +1,6 @@
 # ASS AUTOMATION
 
+This project uses JDK 17.  
 This project aim to recognize conversation text area in PJSK event story record videos and 
 automatically generate `.ass` files for the video to add subtitles.  
 
