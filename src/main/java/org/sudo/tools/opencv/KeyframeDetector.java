@@ -107,27 +107,36 @@ public class KeyframeDetector extends Detector {
                         this.setVideoSectionStart(frameCounter);
 
                         if (this.currentTextSectionIndex < this.textSections.size()) {
-                            if (this.currentTextSectionIndex > this.textSections.size() - 1)
-                                continue;
+                            var textSection = this.textSections.get(this.currentTextSectionIndex);
 
-                            this.skipToFrame = frameCounter + calculateTextToFrames(
-                                    this.textSections
-                                            .get(this.currentTextSectionIndex)
-                                            .getText(),
-                                    fps
-                            );
+                            if (textSection.isShaking()) {
+                                this.getLastVideoSection().getAnchorMovement().add(this.frameDetector.getTemplateArea().tl());
+                            } else {
+                                this.skipToFrame = frameCounter + calculateTextToFrames(
+                                        this.textSections
+                                                .get(this.currentTextSectionIndex)
+                                                .getText(),
+                                        fps
+                                );
 
-                            LOGGER.info(
-                                    String.format(
-                                            "skipping from frame %d to frame %d, skipping %d frames, %d skips left",
-                                            frameCounter,
-                                            this.skipToFrame,
-                                            this.skipToFrame - frameCounter,
-                                            this.textSections.size() - this.currentTextSectionIndex
-                                    )
-                            );
+                                LOGGER.info(
+                                        String.format(
+                                                "skipping from frame %d to frame %d, skipping %d frames, %d skips left",
+                                                frameCounter,
+                                                this.skipToFrame,
+                                                this.skipToFrame - frameCounter,
+                                                this.textSections.size() - this.currentTextSectionIndex
+                                        )
+                                );
+                            }
                         } else {
                             LOGGER.warning("unmatched current text section index, possible alignment error");
+                        }
+                    } else if (this.currentTextSectionIndex < this.textSections.size()) {
+                        var textSection = this.textSections.get(this.currentTextSectionIndex);
+
+                        if (textSection.isShaking()) {
+                            this.getLastVideoSection().getAnchorMovement().add(this.frameDetector.getTemplateArea().tl());
                         }
                     }
                 } else if (this.isLastVideoStartedButNotEnded()) {

@@ -2,20 +2,25 @@ package org.sudo.tools.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.opencv.core.Point;
+
+import java.util.ArrayList;
 
 @Getter
 @Setter
 public class VideoSection {
-    int startFrame;
-    int endFrame;
-    double startTimeStamp;
-    double endTimeStamp;
+    private int startFrame;
+    private int endFrame;
+    private double startTimeStamp;
+    private double endTimeStamp;
+    private ArrayList<Point> anchorMovement;
 
     public VideoSection() {
         this.startFrame = -1;
         this.endFrame = -1;
         this.startTimeStamp = 0;
         this.endTimeStamp = 0;
+        this.anchorMovement = new ArrayList<>();
     }
 
     public boolean hasStart() {
