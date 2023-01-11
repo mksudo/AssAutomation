@@ -37,14 +37,6 @@ public class SceneReader {
 
         for (int snippetIndex = 0; snippetIndex < this.eventData.getSnippets().size(); snippetIndex++) {
             Snippet snippet = this.eventData.getSnippets().get(snippetIndex);
-            Snippet nextSnippet = null;
-            if (snippetIndex + 1 < this.eventData.getSnippets().size()) {
-                nextSnippet = this.eventData.getSnippets().get(snippetIndex + 1);
-            }
-            SpecialEffectData nextSpecialEffectData = null;
-            if (nextSnippet != null && nextSnippet.getAction() == SnippetActionType.SPECIAL_EFFECT) {
-                nextSpecialEffectData = this.eventData.getSpecialEffectData().get(nextSnippet.getReferenceIndex());
-            }
 
             switch (snippet.getAction()) {
                 case TALK -> {
@@ -58,10 +50,30 @@ public class SceneReader {
                             talkData.getWindowDisplayName()
                     );
 
-                    if (nextSpecialEffectData != null) {
+                    Snippet nextSnippet;
+                    SpecialEffectData nextSpecialEffectData;
+
+                    for (
+                            int nextSnippetIndex = snippetIndex + 1;
+                            nextSnippetIndex < this.eventData.getSnippets().size() && !textSection.isShaking();
+                            nextSnippetIndex++
+                    ) {
+                        nextSnippet = this.eventData.getSnippets().get(nextSnippetIndex);
+
+                        if (nextSnippet.getAction() == SnippetActionType.TALK) {
+                            break;
+                        }
+
+                        if (nextSnippet.getAction() != SnippetActionType.SPECIAL_EFFECT) {
+                            continue;
+                        }
+
+                        nextSpecialEffectData = this.eventData
+                                .getSpecialEffectData()
+                                .get(nextSnippet.getReferenceIndex());
+
                         if (
-                                nextSpecialEffectData.getEffectType() == SpecialEffectType.SHAKE_WINDOW ||
-                                        nextSpecialEffectData.getEffectType() == SpecialEffectType.SHAKE_SCREEN
+                                nextSpecialEffectData.getEffectType() == SpecialEffectType.SHAKE_WINDOW
                         ) {
                             textSection.setShaking(true);
                         }
