@@ -1,6 +1,5 @@
 package org.sudo.tools.ass;
 
-import org.opencv.core.Point;
 import org.sudo.tools.ConfigProvider;
 import org.sudo.tools.models.AssEvent;
 import org.sudo.tools.models.VideoSection;
@@ -107,7 +106,63 @@ public class AssWriter {
             VideoSection videoSection = this.videoSections.get(alignedIndex);
             SceneTextSection textSection = this.textSections.get(alignedIndex);
 
-            addDialogueAssEvent(videoSection, textSection, locationTextStyle);
+            switch (textSection.getType()) {
+                case TRANSITION -> {
+                    AssEvent dialogue = AssEvent.builder()
+                            .labelName("Dialogue")
+                            .startTimeStamp(videoSection.getStartTimeStamp())
+                            .endTimeStamp(videoSection.getEndTimeStamp())
+                            .style("screen")
+                            .name("transition")
+                            .text(locationTextStyle + textSection.getText())
+                            .build();
+                    this.assEvents.add(dialogue);
+                }
+                case CONVERSATION -> {
+                    String text = textSection.getText().replaceAll("\n", "\\\\N");
+                    if (textSection.isShaking()) {
+                        text = "SHAKING: " + text;
+                    }
+
+                    String characterStyle = getCharacterStyle(textSection.getCharacterName());
+                    AssEvent dialogue = AssEvent.builder()
+                            .labelName("Dialogue")
+                            .startTimeStamp(videoSection.getStartTimeStamp())
+                            .endTimeStamp(videoSection.getEndTimeStamp())
+                            .style(characterStyle)
+                            .name(textSection.getCharacterName())
+                            .text(text)
+                            .build();
+                    this.assEvents.add(dialogue);
+                }
+            }
+        }
+    }
+
+    private void addCommentAssEvent(VideoSection startSection, VideoSection endSection, SceneTextSection textSection, String locationTextMask, String textMask) {
+        switch (textSection.getType()) {
+            case TRANSITION -> {
+                AssEvent comment = AssEvent.builder()
+                        .labelName("Comment")
+                        .startTimeStamp(startSection.getStartTimeStamp())
+                        .endTimeStamp(endSection.getEndTimeStamp())
+                        .name("screen")
+                        .style("screen")
+                        .text(locationTextMask.isEmpty() ? "TODO: fill location text mask" : locationTextMask)
+                        .build();
+                this.assEvents.add(comment);
+            }
+            case CONVERSATION -> {
+                AssEvent comment = AssEvent.builder()
+                        .labelName("Comment")
+                        .startTimeStamp(startSection.getStartTimeStamp())
+                        .endTimeStamp(endSection.getEndTimeStamp())
+                        .name("screen")
+                        .style("screen")
+                        .text(textMask.isEmpty() ? "TODO: fill conversation text mask" : textMask)
+                        .build();
+                this.assEvents.add(comment);
+            }
         }
     }
 
@@ -178,67 +233,6 @@ public class AssWriter {
         );
     }
 
-
-    private void addDialogueAssEvent(VideoSection videoSection, SceneTextSection textSection, String locationTextStyle) {
-        switch (textSection.getType()) {
-            case TRANSITION -> {
-                AssEvent dialogue = AssEvent.builder()
-                        .labelName("Dialogue")
-                        .startTimeStamp(videoSection.getStartTimeStamp())
-                        .endTimeStamp(videoSection.getEndTimeStamp())
-                        .style("screen")
-                        .name("transition")
-                        .text(locationTextStyle + textSection.getText())
-                        .build();
-                this.assEvents.add(dialogue);
-            }
-            case CONVERSATION -> {
-                String text = textSection.getText().replaceAll("\n", "\\\\N");
-                if (textSection.isShaking()) {
-                    text = "SHAKING: " + text;
-                }
-
-                String characterStyle = getCharacterStyle(textSection.getCharacterName());
-                AssEvent dialogue = AssEvent.builder()
-                        .labelName("Dialogue")
-                        .startTimeStamp(videoSection.getStartTimeStamp())
-                        .endTimeStamp(videoSection.getEndTimeStamp())
-                        .style(characterStyle)
-                        .name(textSection.getCharacterName())
-                        .text(text)
-                        .build();
-                this.assEvents.add(dialogue);
-            }
-        }
-    }
-
-    private void addCommentAssEvent(VideoSection startSection, VideoSection endSection, SceneTextSection textSection, String locationTextMask, String textMask) {
-        switch (textSection.getType()) {
-            case TRANSITION -> {
-                AssEvent comment = AssEvent.builder()
-                        .labelName("Comment")
-                        .startTimeStamp(startSection.getStartTimeStamp())
-                        .endTimeStamp(endSection.getEndTimeStamp())
-                        .name("screen")
-                        .style("screen")
-                        .text(locationTextMask.isEmpty() ? "TODO: fill location text mask" : locationTextMask)
-                        .build();
-                this.assEvents.add(comment);
-            }
-            case CONVERSATION -> {
-                AssEvent comment = AssEvent.builder()
-                        .labelName("Comment")
-                        .startTimeStamp(startSection.getStartTimeStamp())
-                        .endTimeStamp(endSection.getEndTimeStamp())
-                        .name("screen")
-                        .style("screen")
-                        .text(textMask.isEmpty() ? "TODO: fill conversation text mask" : textMask)
-                        .build();
-                this.assEvents.add(comment);
-            }
-        }
-    }
-
     private static String getSampleAssFileContent() {
         var userConfig = ConfigProvider.getInstance().getUserConfig();
 
@@ -284,43 +278,5 @@ public class AssWriter {
         defaultName = characterStyleConfig.getOrDefault("default", defaultName);
 
         return characterStyleConfig.getOrDefault(characterName, defaultName);
-    }
-
-    private static String shiftTextMask(String textMask, Point anchor, Point actual) {
-        var seperatedMask = textMask.split(" ");
-
-        double shiftValueX = actual.x - anchor.x;
-        double shiftValueY = actual.y - anchor.y;
-
-        for (int seperatedStringIndex = 0; seperatedStringIndex < seperatedMask.length; seperatedStringIndex++) {
-            String seperatedPart = seperatedMask[seperatedStringIndex];
-
-            if (seperatedPart.endsWith("m")) {
-                // one point
-                String anchorPointX = seperatedMask[seperatedStringIndex + 1];
-                String anchorPointY = seperatedMask[seperatedStringIndex + 2];
-                seperatedMask[seperatedStringIndex + 1] = shiftCoordinateString(anchorPointX, shiftValueX);
-                seperatedMask[seperatedStringIndex + 2] = shiftCoordinateString(anchorPointY, shiftValueY);
-            } else if (seperatedPart.equals("|")) {
-                for (int lineCoordinateIndex = seperatedStringIndex + 1; lineCoordinateIndex < seperatedMask.length; lineCoordinateIndex += 2) {
-                    String lineCoordinateX = seperatedMask[lineCoordinateIndex];
-                    String lineCoordinateY = seperatedMask[lineCoordinateIndex + 1];
-                    seperatedMask[lineCoordinateIndex] = shiftCoordinateString(lineCoordinateX, shiftValueX);
-                    seperatedMask[lineCoordinateIndex + 1] = shiftCoordinateString(lineCoordinateY, shiftValueY);
-                }
-            }
-        }
-
-        return String.join(" ", seperatedMask);
-    }
-
-    private static String shiftCoordinateString(String coordinate, double shiftValue) {
-        try {
-            int parsedCoordinate = Integer.parseInt(coordinate);
-            return String.valueOf(parsedCoordinate + (int) shiftValue);
-        } catch (NumberFormatException exception) {
-            LOGGER.warning("Number format error while shifting coordinate string, possible invalid format. coordinate: " + coordinate);
-        }
-        return coordinate;
     }
 }

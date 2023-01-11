@@ -110,14 +110,7 @@ public class KeyframeDetector extends Detector {
                             var textSection = this.textSections.get(this.currentTextSectionIndex);
 
                             if (textSection.isShaking()) {
-                                this.getLastVideoSection()
-                                        .getShakeBehaviorTracker()
-                                        .track(
-                                                this.frameDetector
-                                                        .getTemplateArea()
-                                                        .tl(),
-                                                frameCounter
-                                        );
+                                this.getLastVideoSection().getAnchorMovement().add(this.frameDetector.getTemplateArea().tl());
                             } else {
                                 this.skipToFrame = frameCounter + calculateTextToFrames(
                                         this.textSections
@@ -143,14 +136,7 @@ public class KeyframeDetector extends Detector {
                         var textSection = this.textSections.get(this.currentTextSectionIndex);
 
                         if (textSection.isShaking()) {
-                            this.getLastVideoSection()
-                                    .getShakeBehaviorTracker()
-                                    .track(
-                                            this.frameDetector
-                                                    .getTemplateArea()
-                                                    .tl(),
-                                            frameCounter
-                                    );
+                            this.getLastVideoSection().getAnchorMovement().add(this.frameDetector.getTemplateArea().tl());
                         }
                     }
                 } else if (this.isLastVideoStartedButNotEnded()) {
