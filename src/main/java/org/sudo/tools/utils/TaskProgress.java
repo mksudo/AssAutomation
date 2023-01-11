@@ -4,6 +4,8 @@ import lombok.Setter;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ public class TaskProgress {
     @Setter
     private int totalSteps;
     private int currentStep;
+    private double percentage;
     private String error;
     private String progress;
 
@@ -25,6 +28,7 @@ public class TaskProgress {
         this.taskName = "";
         this.totalSteps = 0;
         this.currentStep = 0;
+        this.percentage = 0;
         this.error = "";
         this.progress = "";
     }
@@ -54,15 +58,24 @@ public class TaskProgress {
 
     private void updateTaskProgress(int currentStep, String error) {
         String nextProgress;
+
+        double nextPercentage = new BigDecimal(currentStep * 100.0 / this.totalSteps).setScale(2, RoundingMode.HALF_UP).doubleValue();
+
+        if (nextPercentage == this.percentage) {
+            return;
+        }
+
+        this.percentage = nextPercentage;
+
         if (error.isBlank()) {
             nextProgress = String.format(
-                    "Task %s => progress: %d of %d",
-                    this.taskName, currentStep, this.totalSteps
+                    "Task %s => progress: %5.02f percent",
+                    this.taskName, this.percentage
             );
         } else {
             nextProgress = String.format(
-                    "Task %s => progress: %d/%d, error: %s",
-                    this.taskName, currentStep, this.totalSteps, error
+                    "Task %s => progress: %5.02f percent, error: %s",
+                    this.taskName, this.percentage, error
             );
         }
 
