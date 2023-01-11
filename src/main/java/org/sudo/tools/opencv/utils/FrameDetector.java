@@ -98,14 +98,14 @@ public class FrameDetector {
 
         if (LOGGER.isLoggable(Level.FINE))
             LOGGER.fine(
-                String.format(
-                        "Frame %d => lastHasBanner: %b, hasBanner: %b, hasFirstCharacter: %b, hasSecondCharacter: %b\n",
-                        frameCount,
-                        lastHasBanner,
-                        hasBanner,
-                        hasFirstCharacter,
-                        hasSecondCharacter
-                )
+                    String.format(
+                            "Frame %d => lastHasBanner: %b, hasBanner: %b, hasFirstCharacter: %b, hasSecondCharacter: %b\n",
+                            frameCount,
+                            lastHasBanner,
+                            hasBanner,
+                            hasFirstCharacter,
+                            hasSecondCharacter
+                    )
             );
     }
 
@@ -212,7 +212,7 @@ public class FrameDetector {
 
         Imgproc.findContours(dilatedRoi, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        if(contours.size() > 0) {
+        if (contours.size() > 0) {
             return true;
         }
         if (LOGGER.isLoggable(Level.FINE))
