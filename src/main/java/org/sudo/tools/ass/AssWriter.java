@@ -99,8 +99,6 @@ public class AssWriter {
         this.parseCommentAssEvents(alignedSize, textMask, locationTextMask);
 
         this.parseDialogueAssEvents(alignedSize, locationTextStyle);
-
-
     }
 
     private void parseDialogueAssEvents(int alignedSize, String locationTextStyle) {
@@ -121,6 +119,11 @@ public class AssWriter {
                     this.assEvents.add(dialogue);
                 }
                 case CONVERSATION -> {
+                    String text = textSection.getText().replaceAll("\n", "\\\\N");
+                    if (textSection.isShaking()) {
+                        text = "SHAKING: " + text;
+                    }
+
                     String characterStyle = getCharacterStyle(textSection.getCharacterName());
                     AssEvent dialogue = AssEvent.builder()
                             .labelName("Dialogue")
@@ -128,7 +131,7 @@ public class AssWriter {
                             .endTimeStamp(videoSection.getEndTimeStamp())
                             .style(characterStyle)
                             .name(textSection.getCharacterName())
-                            .text(textSection.getText().replaceAll("\n", "\\\\N"))
+                            .text(text)
                             .build();
                     this.assEvents.add(dialogue);
                 }

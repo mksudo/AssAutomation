@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.sudo.tools.models.eventData.EventData;
+import org.sudo.tools.models.eventData.snippet.Snippet;
+import org.sudo.tools.models.eventData.snippet.SnippetActionType;
+import org.sudo.tools.models.eventData.specialEffectData.SpecialEffectData;
 import org.sudo.tools.models.eventData.specialEffectData.SpecialEffectType;
 import org.sudo.tools.models.scene.SceneTextSection;
 import org.sudo.tools.models.scene.SceneTextType;
@@ -31,20 +34,40 @@ public class SceneReader {
 
     public void parseTextSections() {
         this.textSections = new ArrayList<>();
-        this.eventData.getSnippets().forEach(snippet -> {
+
+        for (int snippetIndex = 0; snippetIndex < this.eventData.getSnippets().size(); snippetIndex++) {
+            Snippet snippet = this.eventData.getSnippets().get(snippetIndex);
+            Snippet nextSnippet = null;
+            if (snippetIndex + 1 < this.eventData.getSnippets().size()) {
+                nextSnippet = this.eventData.getSnippets().get(snippetIndex + 1);
+            }
+            SpecialEffectData nextSpecialEffectData = null;
+            if (nextSnippet != null && nextSnippet.getAction() == SnippetActionType.SPECIAL_EFFECT) {
+                nextSpecialEffectData = this.eventData.getSpecialEffectData().get(nextSnippet.getReferenceIndex());
+            }
+
             switch (snippet.getAction()) {
                 case TALK -> {
                     var talkData = this.eventData
                             .getTalkData()
                             .get(snippet.getReferenceIndex());
 
-                    this.textSections.add(
-                            new SceneTextSection(
-                                    SceneTextType.CONVERSATION,
-                                    talkData.getBody(),
-                                    talkData.getWindowDisplayName()
-                            )
+                    SceneTextSection textSection = new SceneTextSection(
+                            SceneTextType.CONVERSATION,
+                            talkData.getBody(),
+                            talkData.getWindowDisplayName()
                     );
+
+                    if (nextSpecialEffectData != null) {
+                        if (
+                                nextSpecialEffectData.getEffectType() == SpecialEffectType.SHAKE_WINDOW ||
+                                        nextSpecialEffectData.getEffectType() == SpecialEffectType.SHAKE_SCREEN
+                        ) {
+                            textSection.setShaking(true);
+                        }
+                    }
+
+                    this.textSections.add(textSection);
                 }
                 case SPECIAL_EFFECT -> {
                     var specialEffectData = this.eventData
@@ -62,7 +85,7 @@ public class SceneReader {
                     }
                 }
             }
-        });
+        }
     }
 
     public List<SceneTextSection> getNoNewLineTextSections() {
