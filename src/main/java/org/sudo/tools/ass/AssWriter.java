@@ -128,7 +128,7 @@ public class AssWriter {
                             .endTimeStamp(videoSection.getEndTimeStamp())
                             .style(characterStyle)
                             .name(textSection.getCharacterName())
-                            .text(textSection.getText().replaceAll("\n", "\\\\n"))
+                            .text(textSection.getText().replaceAll("\n", "\\\\N"))
                             .build();
                     this.assEvents.add(dialogue);
                 }
