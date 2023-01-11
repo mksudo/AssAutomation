@@ -3,6 +3,7 @@ package org.sudo.tools.models;
 import lombok.Getter;
 import lombok.Setter;
 import org.opencv.core.Point;
+import org.sudo.tools.opencv.utils.ShakeBehaviorTracker;
 
 import java.util.ArrayList;
 
@@ -13,14 +14,14 @@ public class VideoSection {
     private int endFrame;
     private double startTimeStamp;
     private double endTimeStamp;
-    private ArrayList<Point> anchorMovement;
+    private ShakeBehaviorTracker shakeBehaviorTracker;
 
     public VideoSection() {
         this.startFrame = -1;
         this.endFrame = -1;
         this.startTimeStamp = 0;
         this.endTimeStamp = 0;
-        this.anchorMovement = new ArrayList<>();
+        this.shakeBehaviorTracker = new ShakeBehaviorTracker();
     }
 
     public boolean hasStart() {
@@ -38,6 +39,8 @@ public class VideoSection {
     public void calculateTimeStamp(double fps) {
         this.startTimeStamp = this.startFrame / fps;
         this.endTimeStamp = this.endFrame / fps;
+
+        this.shakeBehaviorTracker.calculateTimestamps(fps);
     }
 
     public boolean tooShort() {
